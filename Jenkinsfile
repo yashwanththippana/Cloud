@@ -1,10 +1,6 @@
 pipeline {
-    agent {
-        any {
-            image 'hashicorp/terraform:1.7.5'
-            args '-u root:root'   // ensures permissions inside container
-        }
-    }
+
+    agent none   // we will define agents per stage
 
     parameters {
         choice(
@@ -21,18 +17,19 @@ pipeline {
     stages {
 
         stage('Checkout') {
+            agent any
             steps {
                 checkout scm
             }
         }
 
-        stage('Show Selection') {
-            steps {
-                echo "Selected service: ${SERVICE}"
-            }
-        }
-
         stage('Verify AWS Auth') {
+            agent {
+                docker {
+                    image 'amazon/aws-cli:2.17.0'
+                    args '-u root:root'
+                }
+            }
             steps {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',
                                   credentialsId: 'aws-creds']]) {
@@ -42,6 +39,12 @@ pipeline {
         }
 
         stage('Terraform Init') {
+            agent {
+                docker {
+                    image 'hashicorp/terraform:1.7.5'
+                    args '-u root:root'
+                }
+            }
             steps {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',
                                   credentialsId: 'aws-creds']]) {
@@ -51,6 +54,12 @@ pipeline {
         }
 
         stage('Terraform Plan') {
+            agent {
+                docker {
+                    image 'hashicorp/terraform:1.7.5'
+                    args '-u root:root'
+                }
+            }
             steps {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',
                                   credentialsId: 'aws-creds']]) {
@@ -60,6 +69,12 @@ pipeline {
         }
 
         stage('Terraform Apply') {
+            agent {
+                docker {
+                    image 'hashicorp/terraform:1.7.5'
+                    args '-u root:root'
+                }
+            }
             steps {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',
                                   credentialsId: 'aws-creds']]) {
