@@ -1,5 +1,10 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'hashicorp/terraform:1.7.5'
+            args '-u root:root'   // ensures permissions inside container
+        }
+    }
 
     parameters {
         choice(
@@ -15,9 +20,24 @@ pipeline {
 
     stages {
 
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
         stage('Show Selection') {
             steps {
                 echo "Selected service: ${SERVICE}"
+            }
+        }
+
+        stage('Verify AWS Auth') {
+            steps {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',
+                                  credentialsId: 'aws-creds']]) {
+                    sh 'aws sts get-caller-identity'
+                }
             }
         }
 
