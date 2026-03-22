@@ -25,7 +25,7 @@ pipeline {
 
         stage('Verify AWS Auth') {
             agent {
-                any {
+                docker {
                     image 'amazon/aws-cli:2.17.0'
                     args '-u root:root'
                 }
@@ -40,7 +40,7 @@ pipeline {
 
         stage('Terraform Init') {
             agent {
-                any {
+                docker {
                     image 'hashicorp/terraform:1.7.5'
                     args '-u root:root'
                 }
@@ -55,7 +55,7 @@ pipeline {
 
         stage('Terraform Plan') {
             agent {
-                any {
+                docker {
                     image 'hashicorp/terraform:1.7.5'
                     args '-u root:root'
                 }
@@ -70,7 +70,7 @@ pipeline {
 
         stage('Terraform Apply') {
             agent {
-                any {
+                docker {
                     image 'hashicorp/terraform:1.7.5'
                     args '-u root:root'
                 }
