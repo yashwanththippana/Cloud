@@ -1,6 +1,6 @@
 pipeline {
     agent {
-        docker {
+        any {
             image 'hashicorp/terraform:1.7.5'
             args '-u root:root'   // ensures permissions inside container
         }
