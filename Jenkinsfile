@@ -1,6 +1,6 @@
 pipeline {
 
-    agent any   // Jenkins controller will run all stages
+    agent any   // All stages run on Jenkins controller where AWS CLI & Terraform are installed
 
     parameters {
         choice(
@@ -32,7 +32,10 @@ pipeline {
             steps {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',
                                   credentialsId: 'aws-creds']]) {
-                    sh 'aws sts get-caller-identity'
+                    sh '''
+                        echo "Verifying AWS authentication..."
+                        aws sts get-caller-identity
+                    '''
                 }
             }
         }
@@ -41,7 +44,10 @@ pipeline {
             steps {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',
                                   credentialsId: 'aws-creds']]) {
-                    sh "terraform -chdir=envs/dev init"
+                    sh '''
+                        echo "Running Terraform Init..."
+                        terraform -chdir=envs/dev init
+                    '''
                 }
             }
         }
@@ -50,7 +56,10 @@ pipeline {
             steps {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',
                                   credentialsId: 'aws-creds']]) {
-                    sh "terraform -chdir=envs/dev plan -var service=${SERVICE}"
+                    sh """
+                        echo "Running Terraform Plan for service: ${SERVICE}"
+                        terraform -chdir=envs/dev plan -var service=${SERVICE}
+                    """
                 }
             }
         }
@@ -59,7 +68,10 @@ pipeline {
             steps {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',
                                   credentialsId: 'aws-creds']]) {
-                    sh "terraform -chdir=envs/dev apply -auto-approve -var service=${SERVICE}"
+                    sh """
+                        echo "Running Terraform Apply for service: ${SERVICE}"
+                        terraform -chdir=envs/dev apply -auto-approve -var service=${SERVICE}
+                    """
                 }
             }
         }
